@@ -88,7 +88,7 @@ st.dataframe(
             "sources_responded", "sources_missing", "latency_ms",
         ]
     ],
-    use_container_width=True,
+    width='stretch',
     hide_index=True,
 )
 
@@ -101,6 +101,6 @@ if decision_id is not None:
     detail = scores[scores["decision_id"] == decision_id].sort_values("combined_score", ascending=False)
     st.dataframe(
         detail[["source_id", "location", "status", "reliability_score", "recency_score", "quality_score", "combined_score", "is_winner"]],
-        use_container_width=True,
+        width='stretch',
         hide_index=True,
     )
