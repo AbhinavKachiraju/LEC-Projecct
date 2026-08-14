@@ -29,7 +29,7 @@ So the agent instead scores every reading on three independent signals,
 combines them into a single trust score, and explains the arithmetic in
 plain text every time. When ground truth becomes available later (a
 physical audit / cycle count), it grades every source that took part in
-that conflict and updates its belief about how reliable each source is, 
+that conflict and updates its belief about how reliable each source is,
 so the *next* conflict between the same sources starts from a different
 prior.
 
@@ -76,7 +76,7 @@ that's not how staleness actually works:
 - Audit → 72h half-life (a physical count is assumed to hold until the
   next one)
 
-### 3. Quality:  signals intrinsic to *this specific reading*
+### 3. Quality: signals intrinsic to *this specific reading*
 Independent of the source's history: GPS accuracy in metres, whether a
 WMS scan came from a fixed gate reader vs. a handheld device, whether a
 manual entry was supervisor-verified. Two readings from the same source
@@ -139,6 +139,10 @@ project's monitoring dashboard: conflict rate, average winning margin,
 per-source reliability over time, a filterable decision log, and a
 drill-down into any single decision's full score breakdown.
 
+**Ask the Agent page (`pages/1_Ask_the_Agent.py`, Streamlit).**
+Auto-appears in the dashboard sidebar: query any asset live, see the
+full score breakdown, submit an audit and watch reliability update.
+
 ## Repository layout
 
 ```
@@ -152,6 +156,8 @@ src/
   cli.py          Interactive CLI: state in data/trust_state.json, logs to data/decisions.db
   api.py          FastAPI service: same reconciler, HTTP instead of a terminal
 dashboard.py      Streamlit dashboard reading data/decisions.db directly
+pages/
+  1_Ask_the_Agent.py  Interactive live-query page, auto-detected by Streamlit
 demo.py           Scripted walkthrough: the thing to run for the video
 tests/
   test_reconciler.py   trust-scoring and decision logic
@@ -189,6 +195,8 @@ uvicorn src.api:app --reload
 
 # Dashboard (point it at the same data/decisions.db the CLI/API/demo write to)
 streamlit run dashboard.py
+# "Ask the Agent" page appears automatically in the sidebar — live query
+# + audit submission, hits the same reconciler as the CLI/API/demo.
 
 # Tests
 python3 -m pytest tests/ -v
@@ -216,10 +224,14 @@ state:
    actually right, WMS's reliability is marked down, GPS's up.
 2. **`PALLET-204`**: WMS *and* the check-in sheet agree with each
    other; GPS disagrees with both. A vote-counting agent would pick the
-   2-1 majority. This agent still weighs by score, and helped by the
-   trust update from query 1 plus a very precise (12m) GPS reading,
-   picks GPS. The margin is thin enough that the output flags it as a
-   low-confidence call. Audit confirms GPS was right again.
+   2-1 majority. This agent still weighs by score rather than headcount,
+   but in this run it still picks WMS (0.833 vs GPS's 0.808) — the
+   margin is thin enough that the output flags it as a low-confidence
+   call. The audit then reveals GPS was actually right, so WMS and
+   checkin_sheet both take a second reliability hit while GPS's trust
+   rises further. This is deliberately left in the demo: it shows the
+   thin-margin flag doing its job (telling a reviewer "don't trust this
+   blindly") on a call the agent actually gets wrong.
 3. **`TOOLBOX-55`**: the technician's device hasn't synced (`None`
    returned, named explicitly in the explanation, not guessed). WMS is
    an 8-hour-old scan; the check-in sheet is a 2-hour-old,
@@ -237,59 +249,25 @@ Final printed reliability after the run: `wms` drops from a 0.85 prior
 to ~0.65 (0 correct / 3 wrong), `tech_gps` rises from 0.75 to ~0.79
 (2/2), `checkin_sheet` settles around 0.50 (1/3).
 
-## Design decisions worth defending
-
-- **Beta-Bernoulli over a raw accuracy percentage** for reliability,
-  specifically so a source doesn't get an overconfident reliability
-  score off one or two audits: the posterior is anchored by the prior
-  until there's real evidence.
-- **Per-source-type recency half-life** instead of a single "newest
-  wins" rule, because a 3-hour-old GPS ping and a 3-hour-old check-in
-  sheet entry mean very different things about how stale the data
-  actually is.
-- **Score-based ranking, not majority vote**, precisely because two
-  correlated-but-wrong sources (e.g. WMS and a check-in sheet that was
-  copied from the same stale scan) shouldn't be able to outvote one
-  correct, high-quality reading. Query 2 in the demo is built to make
-  this visible.
-- **Audits are the only source of ground-truth feedback.** The agent
-  never grades a source against another non-audit source's answer:
-  that would let two bad sources reinforce each other's *incorrectness*.
-  Reliability only moves when something closer to ground truth (the
-  audit) is available.
-- **Missing data is reported, not imputed.** `tech_gps` returning `None`
-  when a device hasn't synced is treated as a real signal (see
-  `TOOLBOX-55`), not silently dropped or backfilled with a guess.
-- **Thin-margin flag.** A win by 0.01 and a win by 0.3 are very
-  different levels of confidence; the explanation says so rather than
-  presenting every decision with the same certainty.
-
 ## What I'd do next with more time
 
-- **Confidence decay for sources that go quiet.** A source that simply
-  stops responding for days should probably have its reliability
-  estimate treated as stale/uncertain, not frozen at its last value.
-- **Correlated-source detection.** If the check-in sheet is regularly
-  transcribed *from* the WMS screen, they're not really independent
-  evidence and shouldn't both get full weight when they agree. I'd want
-  to detect and account for that instead of assuming independence.
+- **Confidence decay for sources that go quiet** — a source that stops
+  responding for days should be treated as stale/uncertain, not frozen
+  at its last reliability value.
+- **Correlated-source detection** — if the check-in sheet is regularly
+  transcribed from the WMS screen, they're not independent evidence and
+  shouldn't both get full weight when they agree.
 - **Swap the hand-tuned weights (`0.45/0.35/0.20`) for something learned**
-  from a larger audit history once there's enough data to fit them,
-  rather than picking them by judgment.
-- **Auth and multi-tenancy on the API.** Right now it's a single shared
+  from a larger audit history once there's enough data to fit them.
+- **Auth and multi-tenancy on the API** — right now it's a single shared
   `trust_state.json` and one SQLite file, fine for a demo, not for
-  multiple warehouses or customers. That's also the point where `db.py`
-  moving to SQLAlchemy + Postgres would start earning its keep.
-- **Automatic audit triggering.** The demo controls when an audit fires.
-  A real policy would trigger one automatically when the margin between
-  the top two candidates is below a threshold, or when a source's
-  reliability crosses a "flag for review" line the dashboard's
-  conflict-rate and margin metrics are exactly what that policy would
-  read from.
-- **Per-asset-type profiles.** A forklift and a hand tool have very
-  different plausible movement rates; right now recency half-lives are
-  per-source, not per-(source, asset-type). That's the next axis of
-  nuance I'd add.
+  multiple warehouses or customers.
+- **Automatic audit triggering** — trigger one when the margin between
+  the top two candidates drops below a threshold, or when a source's
+  reliability crosses a "flag for review" line.
+- **Per-asset-type profiles** — a forklift and a hand tool have very
+  different plausible movement rates; recency half-lives are currently
+  per-source, not per-(source, asset-type).
 
 ## Honesty about scope
 
