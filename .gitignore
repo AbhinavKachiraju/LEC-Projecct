@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+data/trust_state.json
+data/demo_trust_state.json
+data/decisions.db
+.venv/
+venv/
+.streamlit/

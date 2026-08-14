@@ -1,0 +1,6 @@
+pytest>=7.0
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.0
+streamlit>=1.32
+pandas>=2.0

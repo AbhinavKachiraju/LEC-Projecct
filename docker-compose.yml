@@ -1,0 +1,20 @@
+services:
+  api:
+    build: .
+    container_name: asset-reconciler-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    command: uvicorn src.api:app --host 0.0.0.0 --port 8000
+
+  dashboard:
+    build: .
+    container_name: asset-reconciler-dashboard
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+    command: streamlit run dashboard.py --server.port 8501 --server.address 0.0.0.0
+    depends_on:
+      - api
