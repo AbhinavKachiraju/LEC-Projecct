@@ -45,8 +45,11 @@ conflict_rate = decisions["conflict"].mean() * 100
 col2.metric("Conflict rate", f"{conflict_rate:.0f}%")
 avg_margin = decisions.loc[decisions["conflict"] == 1, "margin"].mean()
 col3.metric("Avg. winning margin (conflicts)", f"{avg_margin:.3f}" if pd.notna(avg_margin) else "-")
-avg_latency = decisions["latency_ms"].mean()
-col4.metric("Avg. latency", f"{avg_latency:.1f} ms")
+avg_latency = decisions.loc[decisions["origin"] != "demo", "latency_ms"].mean()
+col4.metric(
+    "Avg. latency (live queries)",
+    f"{avg_latency:.2f} ms" if pd.notna(avg_latency) else "-",
+)
 
 # --- Reliability over time ---------------------------------------------
 st.subheader("Learned reliability over time (per source)")

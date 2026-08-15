@@ -46,7 +46,18 @@ if "last_resolution" not in st.session_state:
 
 with st.form("query_form"):
     col1, col2, col3 = st.columns([2, 1, 1])
-    asset_id = col1.text_input("Asset ID", placeholder="e.g. FORKLIFT-118")
+
+    logged = db.fetch_recent_decisions(DB_PATH, limit=1000) if DB_PATH.exists() else []
+    known_assets = {row["asset_id"] for row in logged}
+    suggested_assets = {"FORKLIFT-118", "PALLET-204", "TOOLBOX-55", "CRATE-77", "DRILL-09"}
+    asset_options = sorted(known_assets | suggested_assets) + ["+ Type a new asset ID"]
+
+    asset_choice = col1.selectbox("Asset ID", asset_options, index=0)
+    if asset_choice == "+ Type a new asset ID":
+        asset_id = col1.text_input("New asset ID", placeholder="e.g. LOADER-9")
+    else:
+        asset_id = asset_choice
+
     expected_status = col2.selectbox("Expected status (optional)", [""] + STATUSES)
     seed = col3.number_input("Seed (optional, for reproducibility)", min_value=0, value=0, step=1)
     submitted = st.form_submit_button("Locate asset", type="primary")
