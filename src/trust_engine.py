@@ -36,11 +36,10 @@ from over-reacting to a single lucky/unlucky audit.
 from __future__ import annotations
 
 import json
-import math
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+
 
 from .models import Reading, ScoredReading
 

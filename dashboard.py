@@ -53,7 +53,13 @@ st.subheader("Learned reliability over time (per source)")
 if snapshots.empty:
     st.caption("No audits logged yet: reliability hasn't moved from its prior. Submit an audit to see this fill in.")
 else:
-    pivot = snapshots.pivot_table(index="id", columns="source_id", values="reliability_mean")
+    # trust_snapshots logs one row per source per audit event (three separate
+    # inserts sharing the same `trigger`). Pivoting on the raw auto-increment
+    # `id` puts each source's value on its own row with the other columns
+    # NaN, which breaks the line chart into isolated points. Group by
+    # `trigger` first so all sources from the same audit land on one row.
+    snapshots["audit_event"] = snapshots.groupby("trigger", sort=False).ngroup() + 1
+    pivot = snapshots.pivot_table(index="audit_event", columns="source_id", values="reliability_mean")
     st.line_chart(pivot)
     st.caption(
         "Each step is one audit event. A source's line moving down means it was graded "

@@ -26,7 +26,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
-from .models import Reading, ScoredReading, Resolution
+from .models import Reading, Resolution
 from .trust_engine import TrustState, score_reading
 
 
