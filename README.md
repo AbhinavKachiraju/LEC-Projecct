@@ -195,7 +195,7 @@ uvicorn src.api:app --reload
 
 # Dashboard (point it at the same data/decisions.db the CLI/API/demo write to)
 streamlit run dashboard.py
-# "Ask the Agent" page appears automatically in the sidebar — live query
+# "Ask the Agent" page appears automatically in the sidebar - live query
 # + audit submission, hits the same reconciler as the CLI/API/demo.
 
 # Tests
@@ -225,7 +225,7 @@ state:
 2. **`PALLET-204`**: WMS *and* the check-in sheet agree with each
    other; GPS disagrees with both. A vote-counting agent would pick the
    2-1 majority. This agent still weighs by score rather than headcount,
-   but in this run it still picks WMS (0.833 vs GPS's 0.808) — the
+   but in this run it still picks WMS (0.833 vs GPS's 0.808) - the
    margin is thin enough that the output flags it as a low-confidence
    call. The audit then reveals GPS was actually right, so WMS and
    checkin_sheet both take a second reliability hit while GPS's trust
@@ -251,21 +251,21 @@ to ~0.65 (0 correct / 3 wrong), `tech_gps` rises from 0.75 to ~0.79
 
 ## What I'd do next with more time
 
-- **Confidence decay for sources that go quiet** — a source that stops
+- **Confidence decay for sources that go quiet** - a source that stops
   responding for days should be treated as stale/uncertain, not frozen
   at its last reliability value.
-- **Correlated-source detection** — if the check-in sheet is regularly
+- **Correlated-source detection** - if the check-in sheet is regularly
   transcribed from the WMS screen, they're not independent evidence and
   shouldn't both get full weight when they agree.
 - **Swap the hand-tuned weights (`0.45/0.35/0.20`) for something learned**
   from a larger audit history once there's enough data to fit them.
-- **Auth and multi-tenancy on the API** — right now it's a single shared
+- **Auth and multi-tenancy on the API** - right now it's a single shared
   `trust_state.json` and one SQLite file, fine for a demo, not for
   multiple warehouses or customers.
-- **Automatic audit triggering** — trigger one when the margin between
+- **Automatic audit triggering** - trigger one when the margin between
   the top two candidates drops below a threshold, or when a source's
   reliability crosses a "flag for review" line.
-- **Per-asset-type profiles** — a forklift and a hand tool have very
+- **Per-asset-type profiles** - a forklift and a hand tool have very
   different plausible movement rates; recency half-lives are currently
   per-source, not per-(source, asset-type).
 

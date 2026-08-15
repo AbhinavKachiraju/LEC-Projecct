@@ -17,7 +17,7 @@ import streamlit as st
 DB_PATH = Path(__file__).resolve().parent / "data" / "decisions.db"
 
 st.set_page_config(page_title="Asset Location Reconciler", layout="wide")
-st.title("Asset Location Reconciler — Decision Log")
+st.title("Asset Location Reconciler: Decision Log")
 
 
 def load_table(query: str) -> pd.DataFrame:
@@ -44,14 +44,14 @@ col1.metric("Total decisions", len(decisions))
 conflict_rate = decisions["conflict"].mean() * 100
 col2.metric("Conflict rate", f"{conflict_rate:.0f}%")
 avg_margin = decisions.loc[decisions["conflict"] == 1, "margin"].mean()
-col3.metric("Avg. winning margin (conflicts)", f"{avg_margin:.3f}" if pd.notna(avg_margin) else "—")
+col3.metric("Avg. winning margin (conflicts)", f"{avg_margin:.3f}" if pd.notna(avg_margin) else "-")
 avg_latency = decisions["latency_ms"].mean()
 col4.metric("Avg. latency", f"{avg_latency:.1f} ms")
 
 # --- Reliability over time ---------------------------------------------
 st.subheader("Learned reliability over time (per source)")
 if snapshots.empty:
-    st.caption("No audits logged yet — reliability hasn't moved from its prior. Submit an audit to see this fill in.")
+    st.caption("No audits logged yet: reliability hasn't moved from its prior. Submit an audit to see this fill in.")
 else:
     pivot = snapshots.pivot_table(index="id", columns="source_id", values="reliability_mean")
     st.line_chart(pivot)

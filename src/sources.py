@@ -24,7 +24,7 @@ data for the asset, which is itself a signal worth surfacing) and accepts
 a `truth` dict describing what "really" happened, purely so the demo can
 construct realistic conflicting scenarios deterministically. In a real
 deployment these functions would be HTTP calls to the WMS API, a GPS
-telemetry table, etc. — the reconciler does not care where the Reading
+telemetry table, etc. the reconciler does not care where the Reading
 came from, only what's in it.
 """
 
@@ -68,7 +68,7 @@ def tech_gps_lookup(
 ) -> Optional[Reading]:
     """A field technician's device last-known-position log."""
     if not synced:
-        return None  # device hasn't phoned home — an honest "no data", not a guess
+        return None  # device hasn't phoned home, honest "no data", not a guess
     return Reading(
         source_id="tech_gps",
         source_type="gps_ping",
@@ -110,7 +110,7 @@ def audit_lookup(
     """
     An independent physical cycle count. Rare in practice (you don't
     audit every asset every query) which is why it's invoked explicitly
-    by the demo/CLI rather than on every lookup — but when present it is
+    by the demo/CLI rather than on every lookup, but when present it is
     the closest thing the system has to ground truth, and it is what
     the trust engine uses to grade the other sources after the fact.
     """

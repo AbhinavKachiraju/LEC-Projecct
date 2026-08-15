@@ -35,7 +35,7 @@ DB_PATH = DATA_DIR / "decisions.db"
 st.set_page_config(page_title="Ask the Agent", layout="wide")
 st.title("Ask the Agent")
 st.caption(
-    "Type an asset id and query it live — this hits the same reconciler as the CLI, "
+    "Type an asset id and query it live, this hits the same reconciler as the CLI, "
     "API, and demo, generating a fresh (simulated) reading from each source right now."
 )
 
@@ -86,7 +86,7 @@ if resolution is not None:
         st.warning(resolution.explanation)
     else:
         if resolution.conflict:
-            st.error(f"Conflict detected on **{resolution.asset_id}** — sources disagree.")
+            st.error(f"Conflict detected on **{resolution.asset_id}** - sources disagree.")
         else:
             st.success(f"All sources agree on **{resolution.asset_id}**.")
 
@@ -119,7 +119,7 @@ if resolution is not None:
     st.divider()
     st.subheader("Submit an audit result")
     st.caption(
-        "Once a physical cycle count confirms the true location, feed it back here — "
+        "Once a physical cycle count confirms the true location, feed it back here, "
         "the agent grades every source that answered this query against it and adjusts "
         "their learned reliability for future queries."
     )

@@ -15,7 +15,7 @@ Three tables, stdlib `sqlite3` only:
 
 `origin` on `decisions` tags where the query came from ('cli', 'api',
 'demo') so the dashboard/API can filter scripted demo data out of real
-traffic if needed — the same reason you'd tag environment/service in a
+traffic if needed, the same reason you'd tag environment/service in a
 real logging pipeline.
 """
 

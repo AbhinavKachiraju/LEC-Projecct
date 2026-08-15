@@ -12,7 +12,7 @@ Endpoints:
 Design note: a query and its later audit are two separate HTTP calls,
 same as they'd be two separate real-world events (you query a location
 now, a cycle-count team confirms it hours or days later). The decision
-row's id is the handle that connects them — the API never keeps
+row's id is the handle that connects them, the API never keeps
 in-memory state between requests, everything needed to grade an audit is
 re-read from `data/decisions.db`.
 

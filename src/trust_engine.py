@@ -5,22 +5,22 @@ future decisions get better, not just this one.
 
 Three independent signals are scored per reading, then combined:
 
-1. Reliability (learned) — a Beta-Bernoulli estimate of how often this
+1. Reliability (learned): a Beta-Bernoulli estimate of how often this
    source has been right historically, seeded with a sensible prior and
    updated whenever an audit confirms or contradicts it. This is the
    "state across queries" the brief asks for: it lives in `TrustState`
    and is loaded/saved to disk, so trust in a source persists and shifts
    between runs, not just within one conversation.
 
-2. Recency — freshness matters, but different sources go stale at
+2. Recency: freshness matters, but different sources go stale at
    different rates. A WMS scan is only trustworthy until the asset is
    likely to have moved again; a manual check-in sheet entry is assumed
    to stay roughly true for longer because assets that get logged by
    hand tend to sit still. Each source type has its own decay half-life
-   instead of one global "newest wins" rule — that's the naive version
+   instead of one global "newest wins" rule, that's the naive version
    this deliberately avoids.
 
-3. Data quality — signals intrinsic to the specific reading: GPS
+3. Data quality: signals intrinsic to the specific reading: GPS
    accuracy in metres, whether a manual entry was supervisor-verified,
    whether a WMS scan came from a fixed gate reader (harder to fake/
    mis-scan) versus a handheld device.
@@ -28,7 +28,7 @@ Three independent signals are scored per reading, then combined:
 Why Beta-Bernoulli for reliability instead of a simple moving average of
 "was it right": it naturally represents uncertainty. A source with 1
 correct call out of 1 audit shouldn't be treated the same as one with 40
-correct out of 40 — the Beta posterior mean pulls the first estimate back
+correct out of 40, the Beta posterior mean pulls the first estimate back
 toward the prior until there's enough evidence, which stops the system
 from over-reacting to a single lucky/unlucky audit.
 """

@@ -4,31 +4,31 @@ Scripted demo for the README / video walkthrough.
 Runs five queries against a fresh trust state (data/demo_trust_state.json,
 deleted and rebuilt each run so the demo is reproducible):
 
-  1. FORKLIFT-118 — WMS vs GPS conflict. WMS looks trustworthy on paper
+  1. FORKLIFT-118 - WMS vs GPS conflict. WMS looks trustworthy on paper
      (higher prior, fresher scan) and wins the vote. An audit then reveals
      the GPS log was actually right and the WMS scan was stale. Trust in
      WMS drops a little, trust in tech_gps rises.
 
-  2. PALLET-204 — WMS *and* the check-in sheet agree with each other, GPS
+  2. PALLET-204 - WMS *and* the check-in sheet agree with each other, GPS
      disagrees with both. Naive "majority vote" would pick WMS/sheet. The
      agent still weighs by score, not headcount, and because tech_gps's
      reliability was just bumped up in query 1 and this specific ping is
      very precise (12m) and fresh, it wins anyway. Audit confirms it was
-     right again — tech_gps trust rises further, WMS and checkin_sheet
+     right again - tech_gps trust rises further, WMS and checkin_sheet
      both take a second hit.
 
-  3. TOOLBOX-55 — tech_gps has no data at all (device not synced): the
+  3. TOOLBOX-55 - tech_gps has no data at all (device not synced): the
      agent notices the gap and reconciles between the two sources that did
      respond, rather than guessing on gps's behalf. checkin_sheet is
      supervisor-verified and recent; WMS is a stale 8-hour-old scan. Audit
      confirms the check-in sheet. This is WMS's third consecutive miss.
 
-  4. CRATE-77 — same shape of conflict as query 1 (WMS vs GPS, WMS reading
+  4. CRATE-77 - same shape of conflict as query 1 (WMS vs GPS, WMS reading
      fresher) but run *after* the trust updates above. This is the "does
      learning actually change a later decision" check the brief asks for:
      print both this and query 1's winner side by side.
 
-  5. DRILL-09 — all three sources agree. No conflict to referee; shown for
+  5. DRILL-09 - all three sources agree. No conflict to referee; shown for
      contrast so the video isn't only conflicts.
 """
 
@@ -114,7 +114,7 @@ def main():
         "Where is this pallet?", "PALLET-204", q2, trust_state,
         audit_loc="Truck 7", audit_status="in_transit",
         expect_note="Two sources (WMS + check-in sheet) agree with each other and disagree with GPS. "
-                    "A vote-counting agent would pick the majority — watch what this one does instead.",
+                    "A vote-counting agent would pick the majority - watch what this one does instead.",
     )
 
     # --- Query 3 -----------------------------------------------------------
@@ -126,7 +126,7 @@ def main():
     res3 = run_query(
         "Where is toolbox 55?", "TOOLBOX-55", q3, trust_state,
         audit_loc="Site Office", audit_status="checked_out",
-        expect_note="The technician's device hasn't synced — the agent should notice that gap "
+        expect_note="The technician's device hasn't synced - the agent should notice that gap "
                     "rather than silently guessing on its behalf.",
     )
 
@@ -139,7 +139,7 @@ def main():
     res4 = run_query(
         "Where is crate 77?", "CRATE-77", q4, trust_state,
         expect_note="Structurally almost identical to query 1 (fresh WMS scan vs GPS), run AFTER "
-                    "three audits have already adjusted trust. No audit this time — this is the "
+                    "three audits have already adjusted trust. No audit this time - this is the "
                     "'did learning change anything' check.",
     )
 

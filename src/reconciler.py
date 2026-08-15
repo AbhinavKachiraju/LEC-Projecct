@@ -4,7 +4,7 @@ whether they conflict and, if so, which one to believe.
 
 This module deliberately does *not* retry a failed source or fall back to
 "first answer" / "average the answers" (averaging locations makes no
-sense anyway — you can't be 60% at Dock 3 and 40% at Shelf B12). Instead:
+sense anyway, you can't be 60% at Dock 3 and 40% at Shelf B12). Instead:
 
 1. Detect conflict by comparing normalized (location, status) pairs
    across all readings that actually returned data.
@@ -15,7 +15,7 @@ sense anyway — you can't be 60% at Dock 3 and 40% at Shelf B12). Instead:
 4. Optionally fold in a business-context signal: if the caller supplies
    an "expected" status/location window (e.g. "this asset should be
    'in_transit' until the delivery window closes"), a reading consistent
-   with that context gets a small quality boost — mirroring how a human
+   with that context gets a small quality boost, mirroring how a human
    dispatcher would sanity-check a reading against what's supposed to be
    happening, without letting context override strong evidence on its own.
 """
@@ -132,7 +132,7 @@ def resolve(
     )
     if margin < 0.03:
         lines.append(
-            "Margin is thin — treat this as a low-confidence call and consider "
+            "Margin is thin, treat this as a low-confidence call and consider "
             "triggering a physical audit rather than acting on it blindly."
         )
     if missing_ids:
@@ -170,7 +170,7 @@ def grade_sources(
 ) -> list[str]:
     """
     Lower-level version of `apply_audit_feedback` that doesn't require a
-    live `Resolution` object — just (source_id, location, status) tuples.
+    live `Resolution` object, just (source_id, location, status) tuples.
     This is what lets a stateless API grade sources against an audit
     using only what was persisted to the decision log (`src/db.py`),
     without having to keep the original in-memory Resolution around
